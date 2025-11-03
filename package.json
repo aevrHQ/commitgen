@@ -1,6 +1,6 @@
 {
   "name": "@untools/commitgen",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "CLI to create generate commit messages",
   "main": "dist/index.js",
   "bin": {
@@ -17,14 +17,7 @@
     "release:patch": "standard-version --release-as patch"
   },
   "keywords": [
-    "typescript",
-    "express",
-    "mongodb",
-    "graphql",
-    "starter",
-    "api",
-    "nextjs",
-    "fullstack"
+    "typescript"
   ],
   "files": [
     "dist"
