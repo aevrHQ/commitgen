@@ -80,14 +80,14 @@ class CommitGen {
     console.log(chalk.cyan.bold("\n📊 Analysis:"));
     console.log(
       chalk.gray(
-        `   Files changed: ${chalk.white(analysis.filesChanged.length)}`,
-      ),
+        `   Files changed: ${chalk.white(analysis.filesChanged.length)}`
+      )
     );
     console.log(
-      chalk.gray(`   Additions: ${chalk.green(`+${analysis.additions}`)}`),
+      chalk.gray(`   Additions: ${chalk.green(`+${analysis.additions}`)}`)
     );
     console.log(
-      chalk.gray(`   Deletions: ${chalk.red(`-${analysis.deletions}`)}`),
+      chalk.gray(`   Deletions: ${chalk.red(`-${analysis.deletions}`)}`)
     );
 
     console.log(chalk.cyan.bold("\n📝 Changed files:"));
@@ -99,9 +99,7 @@ class CommitGen {
 
     if (analysis.filesChanged.length > 10) {
       console.log(
-        chalk.gray(
-          `   ... and ${analysis.filesChanged.length - 10} more files`,
-        ),
+        chalk.gray(`   ... and ${analysis.filesChanged.length - 10} more files`)
       );
     }
   }
@@ -123,6 +121,23 @@ class CommitGen {
     return icons[ext] || "📄";
   }
 
+  private hasEnvironmentApiKey(provider: string): boolean {
+    switch (provider) {
+      case "vercel-google":
+        return !!process.env.GOOGLE_GENERATIVE_AI_API_KEY;
+      case "vercel-openai":
+        return !!process.env.OPENAI_API_KEY;
+      case "groq":
+        return !!process.env.GROQ_API_KEY;
+      case "openai":
+        return !!process.env.OPENAI_API_KEY;
+      case "google":
+        return !!process.env.GOOGLE_GENERATIVE_AI_API_KEY;
+      default:
+        return false;
+    }
+  }
+
   async run(options: {
     push?: boolean;
     noverify?: boolean;
@@ -130,7 +145,7 @@ class CommitGen {
   }): Promise<void> {
     console.log(
       chalk.bold.cyan("\n🚀 CommitGen") +
-        chalk.gray(" - AI-Powered Commit Message Generator\n"),
+        chalk.gray(" - AI-Powered Commit Message Generator\n")
     );
 
     if (!this.isGitRepo()) {
@@ -145,7 +160,7 @@ class CommitGen {
       if (analysis.hasUnstaged) {
         console.log(
           chalk.blue("💡 You have unstaged changes. Stage them with:") +
-            chalk.gray(" git add <files>"),
+            chalk.gray(" git add <files>")
         );
       }
       process.exit(0);
@@ -159,12 +174,42 @@ class CommitGen {
       try {
         // Load provider configuration
         const configManager = new ConfigManager();
-        const providerConfig = configManager.getProviderConfig();
+        let providerConfig = configManager.getProviderConfig();
+
+        // Check if API key is missing and prompt for configuration
+        if (
+          !providerConfig.apiKey &&
+          !this.hasEnvironmentApiKey(providerConfig.provider)
+        ) {
+          console.log(
+            chalk.yellow("\n⚠️  API key not found for the selected provider.")
+          );
+          const { shouldConfigure } = await inquirer.prompt([
+            {
+              type: "confirm",
+              name: "shouldConfigure",
+              message: "Would you like to configure your API key now?",
+              default: true,
+            },
+          ]);
+
+          if (shouldConfigure) {
+            await configureCommand();
+            // Reload config after configuration
+            providerConfig = configManager.getProviderConfig();
+          } else {
+            console.log(
+              chalk.gray("Falling back to rule-based suggestions...\n")
+            );
+            suggestions = this.getFallbackSuggestions(analysis);
+            return;
+          }
+        }
 
         console.log(
           chalk.blue(
-            `\n🤖 Generating commit messages using ${providerConfig.provider}...\n`,
-          ),
+            `\n🤖 Generating commit messages using ${providerConfig.provider}...\n`
+          )
         );
 
         // Create provider and generate suggestions
@@ -177,9 +222,34 @@ class CommitGen {
       } catch (error) {
         console.warn(
           chalk.yellow(
-            `⚠️  AI generation failed: ${error instanceof Error ? error.message : "Unknown error"}`,
-          ),
+            `⚠️  AI generation failed: ${
+              error instanceof Error ? error.message : "Unknown error"
+            }`
+          )
         );
+
+        // If it's an API key error, offer to reconfigure
+        if (error instanceof Error && error.message.includes("API key")) {
+          const { shouldReconfigure } = await inquirer.prompt([
+            {
+              type: "confirm",
+              name: "shouldReconfigure",
+              message: "Would you like to reconfigure your API key?",
+              default: true,
+            },
+          ]);
+
+          if (shouldReconfigure) {
+            await configureCommand();
+            console.log(
+              chalk.blue(
+                "\n🔄 Please run the command again with your new configuration."
+              )
+            );
+            return;
+          }
+        }
+
         console.log(chalk.gray("Falling back to rule-based suggestions...\n"));
         suggestions = this.getFallbackSuggestions(analysis);
       }
@@ -290,17 +360,16 @@ class CommitGen {
     const suggestions: CommitMessage[] = [];
 
     const hasTests = filesChanged.some(
-      (f) =>
-        f.includes("test") || f.includes("spec") || f.includes("__tests__"),
+      (f) => f.includes("test") || f.includes("spec") || f.includes("__tests__")
     );
     const hasDocs = filesChanged.some(
-      (f) => f.includes("README") || f.includes(".md"),
+      (f) => f.includes("README") || f.includes(".md")
     );
     const hasConfig = filesChanged.some(
       (f) =>
         f.includes("config") ||
         f.includes(".json") ||
-        f.includes("package.json"),
+        f.includes("package.json")
     );
 
     if (additions > deletions * 2 && additions > 20) {
@@ -351,7 +420,7 @@ class CommitGen {
         {
           type: "refactor",
           subject: `refactor code`,
-        },
+        }
       );
     }
 
@@ -378,5 +447,30 @@ program
   .command("config")
   .description("Configure AI provider and settings")
   .action(configureCommand);
+
+program
+  .command("show-config")
+  .description("Show current configuration")
+  .action(() => {
+    const configManager = new ConfigManager();
+    const config = configManager.getProviderConfig();
+
+    console.log(chalk.cyan.bold("\n⚙️  Current Configuration\n"));
+    console.log(chalk.gray(`Provider: ${chalk.white(config.provider)}`));
+    console.log(chalk.gray(`Model: ${chalk.white(config.model || "default")}`));
+    console.log(
+      chalk.gray(
+        `API Key: ${
+          config.apiKey ? chalk.green("configured") : chalk.red("not set")
+        }`
+      )
+    );
+
+    if (!config.apiKey) {
+      console.log(
+        chalk.yellow("\n💡 Run 'commitgen config' to set up your API key")
+      );
+    }
+  });
 
 program.parse();

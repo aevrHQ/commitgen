@@ -1,6 +1,6 @@
 // ./src/providers/vercel-google.ts
 
-import { google } from "@ai-sdk/google";
+import { createGoogleGenerativeAI } from "@ai-sdk/google";
 import { generateText } from "ai";
 import { BaseProvider } from "./base";
 import { GitAnalysis, CommitMessage, AIProvider } from "../types";
@@ -26,6 +26,10 @@ export class VercelGoogleProvider extends BaseProvider implements AIProvider {
     this.analysis = analysis;
 
     try {
+      const google = createGoogleGenerativeAI({
+        apiKey: this.apiKey,
+      });
+
       const { text } = await generateText({
         model: google(this.model),
         system: this.buildSystemPrompt(),

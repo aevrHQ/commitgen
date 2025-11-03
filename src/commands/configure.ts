@@ -8,6 +8,22 @@ import { ProviderConfig } from "../types";
 export async function configureCommand(): Promise<void> {
   console.log(chalk.cyan.bold("\n⚙️  Configure CommitGen\n"));
 
+  const configManager = new ConfigManager();
+  const currentConfig = configManager.getProviderConfig();
+
+  // Show current configuration if it exists
+  if (currentConfig.provider) {
+    console.log(chalk.gray("Current configuration:"));
+    console.log(chalk.gray(`  Provider: ${currentConfig.provider}`));
+    console.log(chalk.gray(`  Model: ${currentConfig.model || "default"}`));
+    console.log(
+      chalk.gray(
+        `  API Key: ${currentConfig.apiKey ? "***configured***" : "not set"}`
+      )
+    );
+    console.log();
+  }
+
   const { provider } = await inquirer.prompt([
     {
       type: "list",
@@ -33,6 +49,7 @@ export async function configureCommand(): Promise<void> {
         },
         { name: "Local LLM (Coming Soon)", value: "local", disabled: true },
       ],
+      default: currentConfig.provider || "vercel-google",
     },
   ]);
 
@@ -40,13 +57,26 @@ export async function configureCommand(): Promise<void> {
 
   // Provider-specific configuration
   if (provider === "vercel-google") {
+    const hasEnvKey = !!process.env.GOOGLE_GENERATIVE_AI_API_KEY;
+
     const { apiKey, model } = await inquirer.prompt([
       {
         type: "password",
         name: "apiKey",
-        message:
-          "Enter your Google AI API key (or press Enter to use GOOGLE_GENERATIVE_AI_API_KEY env var):",
+        message: hasEnvKey
+          ? "Enter your Google AI API key (or press Enter to use GOOGLE_GENERATIVE_AI_API_KEY env var):"
+          : "Enter your Google AI API key (get one at https://aistudio.google.com/app/apikey):",
         mask: "*",
+        validate: (input: string) => {
+          if (!input.trim() && !hasEnvKey) {
+            return "API key is required. Get one at https://aistudio.google.com/app/apikey";
+          }
+          return true;
+        },
+        default:
+          currentConfig.provider === provider
+            ? currentConfig.apiKey
+            : undefined,
       },
       {
         type: "list",
@@ -61,7 +91,7 @@ export async function configureCommand(): Promise<void> {
           { name: "Gemini 1.5 Flash", value: "gemini-1.5-flash" },
           { name: "Gemini 1.5 Pro", value: "gemini-1.5-pro" },
         ],
-        default: "gemini-2.5-flash",
+        default: currentConfig.model || "gemini-2.5-flash",
       },
     ]);
 
@@ -69,11 +99,10 @@ export async function configureCommand(): Promise<void> {
     config.model = model;
   }
 
-  const configManager = new ConfigManager();
   configManager.setProvider(config);
 
   console.log(chalk.green("\n✅ Configuration saved successfully!"));
   console.log(
-    chalk.gray(`Config file: ${require("os").homedir()}/.commitgenrc.json`),
+    chalk.gray(`Config file: ${require("os").homedir()}/.commitgenrc.json`)
   );
 }

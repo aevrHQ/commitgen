@@ -9,6 +9,7 @@
 🎯 **Conventional Commits**: Follows the [Conventional Commits](https://www.conventionalcommits.org/) specification
 
 🔌 **Modular Providers**: Support for multiple AI providers:
+
 - ✅ Vercel AI SDK (Google Gemini)
 - 🔜 Vercel AI SDK (OpenAI)
 - 🔜 Groq
@@ -34,27 +35,30 @@ npx @untools/commitgen
 
 ## Quick Start
 
-1. **Configure your AI provider** (first time only):
-
-```bash
-commitgen config
-```
-
-Select your provider and enter your API key. The config is saved to `~/.commitgenrc.json`.
-
-2. **Stage your changes**:
+1. **Stage your changes**:
 
 ```bash
 git add .
 ```
 
-3. **Generate commit message**:
+2. **Generate commit message**:
 
 ```bash
 commitgen
 ```
 
-That's it! The tool will analyze your changes and suggest commit messages.
+That's it! If it's your first time, CommitGen will automatically prompt you to configure your API key. The tool will then analyze your changes and suggest commit messages.
+
+### First-Time Setup
+
+When you run `commitgen` for the first time without an API key, you'll see:
+
+```
+⚠️  API key not found for the selected provider.
+? Would you like to configure your API key now? (Y/n)
+```
+
+Choose "Yes" to set up your configuration, or run `commitgen config` manually anytime.
 
 ## Usage
 
@@ -116,11 +120,13 @@ commitgen
 Uses the [Vercel AI SDK](https://sdk.vercel.ai/) with Google's Gemini models.
 
 **Setup:**
+
 1. Get a free API key from [Google AI Studio](https://aistudio.google.com/app/apikey)
 2. Run `commitgen config` and select "Vercel AI SDK - Google Gemini"
 3. Enter your API key or set `GOOGLE_GENERATIVE_AI_API_KEY` environment variable
 
 **Available Models:**
+
 - `gemini-2.5-flash` (Recommended - Fast and efficient)
 - `gemini-2.5-pro` (More capable, higher quality)
 - `gemini-1.5-flash`
@@ -137,16 +143,19 @@ Uses the [Vercel AI SDK](https://sdk.vercel.ai/) with Google's Gemini models.
 ## How It Works
 
 1. **Analysis**: Scans your staged git changes
+
    - File patterns (tests, docs, configs, components)
    - Addition/deletion statistics
    - Git diff content
 
 2. **AI Generation**: Sends analysis to your configured AI provider
+
    - Uses a specialized prompt for commit message generation
    - Follows Conventional Commits specification
    - Returns 3-5 contextual suggestions
 
 3. **Selection**: Interactive prompt to choose or customize
+
    - Select from AI-generated suggestions
    - Write a custom message
    - Confirm before committing
@@ -171,6 +180,7 @@ commitgen
 ```
 
 Output:
+
 ```
 🚀 CommitGen - AI-Powered Commit Message Generator
 
@@ -223,6 +233,7 @@ Generated messages follow the Conventional Commits specification:
 ```
 
 **Types:**
+
 - `feat`: New feature
 - `fix`: Bug fix
 - `docs`: Documentation changes
@@ -236,6 +247,7 @@ Generated messages follow the Conventional Commits specification:
 - `revert`: Revert previous commit
 
 **Example:**
+
 ```
 feat(auth): add OAuth2 authentication
 
@@ -250,6 +262,7 @@ BREAKING CHANGE: Authentication API has changed
 ### "No staged changes found"
 
 Make sure you've staged your changes:
+
 ```bash
 git add <files>
 # or
@@ -259,6 +272,7 @@ git add .
 ### "API key is required"
 
 Set your API key either:
+
 1. Run `commitgen config` to save it in config file
 2. Set environment variable: `export GOOGLE_GENERATIVE_AI_API_KEY="your-key"`
 
