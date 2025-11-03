@@ -17,7 +17,15 @@
     "release:patch": "standard-version --release-as patch"
   },
   "keywords": [
-    "typescript"
+    "git",
+    "commit",
+    "conventional-commits",
+    "ai",
+    "cli",
+    "typescript",
+    "commitizen",
+    "gemini",
+    "openai"
   ],
   "files": [
     "dist"
@@ -39,7 +47,9 @@
   },
   "homepage": "https://github.com/aevrHQ/untools-commitgen#readme",
   "dependencies": {
+    "@ai-sdk/google": "^2.0.26",
     "@untools/port-gen": "^0.0.2",
+    "ai": "^5.0.86",
     "chalk": "^4.1.2",
     "commander": "^13.1.0",
     "degit": "^2.8.4",

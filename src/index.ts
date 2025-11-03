@@ -1,28 +1,14 @@
 #!/usr/bin/env node
 
 // ./src/index.ts
-
 import { execSync } from "child_process";
 import chalk from "chalk";
 import { Command } from "commander";
 import inquirer from "inquirer";
-
-interface CommitMessage {
-  type: string;
-  scope?: string;
-  subject: string;
-  body?: string;
-  breaking?: boolean;
-}
-
-interface GitAnalysis {
-  filesChanged: string[];
-  additions: number;
-  deletions: number;
-  hasStaged: boolean;
-  hasUnstaged: boolean;
-  diff: string;
-}
+import { CommitMessage, GitAnalysis } from "./types";
+import { ConfigManager } from "./config";
+import { configureCommand } from "./commands/configure";
+import { createProvider } from "./providers";
 
 class CommitGen {
   private exec(cmd: string): string {
@@ -77,221 +63,6 @@ class CommitGen {
       hasUnstaged: unstaged !== "",
       diff,
     };
-  }
-
-  private generateCommitMessage(analysis: GitAnalysis): CommitMessage[] {
-    const { filesChanged, additions, deletions, diff } = analysis;
-    const suggestions: CommitMessage[] = [];
-
-    // Analyze file patterns
-    const hasTests = filesChanged.some(
-      (f) =>
-        f.includes("test") || f.includes("spec") || f.includes("__tests__"),
-    );
-    const hasDocs = filesChanged.some(
-      (f) =>
-        f.includes("README") ||
-        f.includes(".md") ||
-        f.toLowerCase().includes("doc"),
-    );
-    const hasConfig = filesChanged.some(
-      (f) =>
-        f.includes("config") ||
-        f.includes(".json") ||
-        f.includes(".yml") ||
-        f.includes(".yaml") ||
-        f.includes(".toml") ||
-        f.includes("package.json") ||
-        f.includes("tsconfig"),
-    );
-    const hasStyles = filesChanged.some(
-      (f) =>
-        f.includes(".css") ||
-        f.includes(".scss") ||
-        f.includes(".sass") ||
-        f.includes(".less"),
-    );
-    const hasComponents = filesChanged.some(
-      (f) =>
-        f.includes("component") ||
-        f.includes(".tsx") ||
-        f.includes(".jsx") ||
-        f.includes("Component"),
-    );
-    const hasDependencies = filesChanged.some(
-      (f) =>
-        f.includes("package.json") ||
-        f.includes("package-lock.json") ||
-        f.includes("yarn.lock"),
-    );
-    const hasCI = filesChanged.some(
-      (f) =>
-        f.includes(".github") ||
-        f.includes("gitlab-ci") ||
-        f.includes("Jenkinsfile"),
-    );
-    const hasBuild = filesChanged.some(
-      (f) =>
-        f.includes("webpack") ||
-        f.includes("vite") ||
-        f.includes("rollup") ||
-        f.includes("build"),
-    );
-
-    // Check for breaking changes
-    const hasBreaking =
-      diff.toLowerCase().includes("breaking change") ||
-      diff.includes("BREAKING CHANGE");
-
-    // Generate contextual suggestions
-    if (additions > deletions * 2 && additions > 20) {
-      suggestions.push({
-        type: "feat",
-        subject: `add ${this.inferFeatureType(filesChanged)}`,
-        body: `Added ${filesChanged.length} file(s) with ${additions} lines`,
-      });
-    }
-
-    if (deletions > additions * 2 && deletions > 20) {
-      suggestions.push({
-        type: "refactor",
-        subject: `remove unused ${this.inferFeatureType(filesChanged)}`,
-        body: `Removed ${deletions} lines from ${filesChanged.length} file(s)`,
-      });
-    }
-
-    if (hasTests) {
-      suggestions.push({
-        type: "test",
-        subject: `add tests for ${this.inferScope(filesChanged)}`,
-      });
-    }
-
-    if (hasDocs) {
-      suggestions.push({
-        type: "docs",
-        subject: "update documentation",
-      });
-    }
-
-    if (hasConfig && !hasDependencies) {
-      suggestions.push({
-        type: "chore",
-        subject: "update configuration",
-      });
-    }
-
-    if (hasDependencies) {
-      suggestions.push({
-        type: "chore",
-        subject: "update dependencies",
-      });
-    }
-
-    if (hasStyles) {
-      suggestions.push({
-        type: "style",
-        subject: `update ${this.inferScope(filesChanged)} styling`,
-      });
-    }
-
-    if (hasComponents) {
-      suggestions.push({
-        type: "feat",
-        subject: `update ${this.inferScope(filesChanged)} component`,
-      });
-    }
-
-    if (hasCI) {
-      suggestions.push({
-        type: "ci",
-        subject: "update CI/CD configuration",
-      });
-    }
-
-    if (hasBuild) {
-      suggestions.push({
-        type: "build",
-        subject: "update build configuration",
-      });
-    }
-
-    // Default suggestions
-    if (suggestions.length === 0) {
-      const scope = this.inferScope(filesChanged);
-      suggestions.push(
-        {
-          type: "feat",
-          subject: `add ${this.inferFeatureType(filesChanged)}`,
-          scope:
-            scope !== "project" && scope !== "multiple modules"
-              ? scope
-              : undefined,
-        },
-        {
-          type: "fix",
-          subject: `resolve issue in ${scope}`,
-        },
-        {
-          type: "refactor",
-          subject: `improve ${scope}`,
-        },
-      );
-    }
-
-    // Mark breaking if detected
-    if (hasBreaking) {
-      suggestions.forEach((s) => (s.breaking = true));
-    }
-
-    return suggestions.slice(0, 5);
-  }
-
-  private inferFeatureType(files: string[]): string {
-    if (files.some((f) => f.includes("component") || f.includes("Component")))
-      return "component";
-    if (files.some((f) => f.includes("util") || f.includes("helper")))
-      return "utility";
-    if (files.some((f) => f.includes("api") || f.includes("endpoint")))
-      return "API endpoint";
-    if (files.some((f) => f.includes("model") || f.includes("schema")))
-      return "model";
-    if (files.some((f) => f.includes("service"))) return "service";
-    if (files.some((f) => f.includes("hook"))) return "hook";
-    if (files.some((f) => f.includes("type") || f.includes("interface")))
-      return "types";
-    return "feature";
-  }
-
-  private inferScope(files: string[]): string {
-    if (files.length === 0) return "project";
-
-    // Extract first directory from each file
-    const dirs = files
-      .map((f) => f.split("/")[0])
-      .filter((d) => d && !d.startsWith("."));
-
-    if (dirs.length === 0) return "root";
-
-    // Find most common directory
-    const dirCount = dirs.reduce(
-      (acc, d) => {
-        acc[d] = (acc[d] || 0) + 1;
-        return acc;
-      },
-      {} as Record<string, number>,
-    );
-
-    const mostCommon = Object.entries(dirCount).sort(
-      (a, b) => b[1] - a[1],
-    )[0][0];
-
-    // If most common directory covers most files, use it
-    if (dirCount[mostCommon] >= files.length * 0.6) {
-      return mostCommon;
-    }
-
-    return "multiple modules";
   }
 
   private formatCommitMessage(msg: CommitMessage): string {
@@ -352,7 +123,11 @@ class CommitGen {
     return icons[ext] || "📄";
   }
 
-  async run(options: { push?: boolean; noverify?: boolean }): Promise<void> {
+  async run(options: {
+    push?: boolean;
+    noverify?: boolean;
+    useAi?: boolean;
+  }): Promise<void> {
     console.log(
       chalk.bold.cyan("\n🚀 CommitGen") +
         chalk.gray(" - AI-Powered Commit Message Generator\n"),
@@ -378,13 +153,45 @@ class CommitGen {
 
     this.displayAnalysis(analysis);
 
-    const suggestions = this.generateCommitMessage(analysis);
+    let suggestions: CommitMessage[];
 
-    console.log(chalk.cyan.bold("\n💡 Suggested commit messages:\n"));
+    if (options.useAi !== false) {
+      try {
+        // Load provider configuration
+        const configManager = new ConfigManager();
+        const providerConfig = configManager.getProviderConfig();
+
+        console.log(
+          chalk.blue(
+            `\n🤖 Generating commit messages using ${providerConfig.provider}...\n`,
+          ),
+        );
+
+        // Create provider and generate suggestions
+        const provider = createProvider(providerConfig);
+        suggestions = await provider.generateCommitMessage(analysis);
+
+        if (!suggestions || suggestions.length === 0) {
+          throw new Error("No suggestions generated");
+        }
+      } catch (error) {
+        console.warn(
+          chalk.yellow(
+            `⚠️  AI generation failed: ${error instanceof Error ? error.message : "Unknown error"}`,
+          ),
+        );
+        console.log(chalk.gray("Falling back to rule-based suggestions...\n"));
+        suggestions = this.getFallbackSuggestions(analysis);
+      }
+    } else {
+      suggestions = this.getFallbackSuggestions(analysis);
+    }
+
+    console.log(chalk.cyan.bold("💡 Suggested commit messages:\n"));
 
     const choices = suggestions.map((s, i) => {
       const formatted = this.formatCommitMessage(s);
-      const preview = formatted.split("\n")[0]; // First line only
+      const preview = formatted.split("\n")[0];
       return {
         name: `${chalk.gray(`${i + 1}.`)} ${preview}`,
         value: formatted,
@@ -477,6 +284,79 @@ class CommitGen {
       process.exit(1);
     }
   }
+
+  private getFallbackSuggestions(analysis: GitAnalysis): CommitMessage[] {
+    const { filesChanged, additions, deletions } = analysis;
+    const suggestions: CommitMessage[] = [];
+
+    const hasTests = filesChanged.some(
+      (f) =>
+        f.includes("test") || f.includes("spec") || f.includes("__tests__"),
+    );
+    const hasDocs = filesChanged.some(
+      (f) => f.includes("README") || f.includes(".md"),
+    );
+    const hasConfig = filesChanged.some(
+      (f) =>
+        f.includes("config") ||
+        f.includes(".json") ||
+        f.includes("package.json"),
+    );
+
+    if (additions > deletions * 2 && additions > 20) {
+      suggestions.push({
+        type: "feat",
+        subject: `add new feature`,
+      });
+    }
+
+    if (deletions > additions * 2 && deletions > 20) {
+      suggestions.push({
+        type: "refactor",
+        subject: `remove unused code`,
+      });
+    }
+
+    if (hasTests) {
+      suggestions.push({
+        type: "test",
+        subject: `add tests`,
+      });
+    }
+
+    if (hasDocs) {
+      suggestions.push({
+        type: "docs",
+        subject: "update documentation",
+      });
+    }
+
+    if (hasConfig) {
+      suggestions.push({
+        type: "chore",
+        subject: "update configuration",
+      });
+    }
+
+    if (suggestions.length === 0) {
+      suggestions.push(
+        {
+          type: "feat",
+          subject: `add feature`,
+        },
+        {
+          type: "fix",
+          subject: `fix issue`,
+        },
+        {
+          type: "refactor",
+          subject: `refactor code`,
+        },
+      );
+    }
+
+    return suggestions.slice(0, 5);
+  }
 }
 
 // CLI setup
@@ -485,12 +365,18 @@ const program = new Command();
 program
   .name("commitgen")
   .description("AI-powered commit message generator for Git")
-  .version("0.0.3")
+  .version("0.0.4")
   .option("-p, --push", "Push changes after committing")
   .option("-n, --noverify", "Skip git hooks (--no-verify)")
+  .option("--no-ai", "Disable AI generation and use rule-based suggestions")
   .action(async (options) => {
     const commitGen = new CommitGen();
     await commitGen.run(options);
   });
+
+program
+  .command("config")
+  .description("Configure AI provider and settings")
+  .action(configureCommand);
 
 program.parse();
