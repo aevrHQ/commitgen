@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [0.1.0](https://github.com/aevrHQ/commitgen/compare/v0.0.5...v0.1.0) (2025-11-03)
+
+
+### Features
+
+* **config:** prompt for api key on first use ([5ba3e50](https://github.com/aevrHQ/commitgen/commit/5ba3e504b93475c307cc1044beb53130a5d9c4d7))
+* **project:** initialize comprehensive README and project structure ([8bde3ed](https://github.com/aevrHQ/commitgen/commit/8bde3edd930d019e135c5ca46e7b6afddbf48af0))
+
 ### [0.0.5](https://github.com/aevrHQ/commitgen/compare/v0.0.4...v0.0.5) (2025-11-03)
 
 
