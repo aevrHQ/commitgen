@@ -698,11 +698,14 @@ const program = new Command();
 program
   .name("commitgen")
   .description("AI-powered commit message generator for Git")
-  .version("0.2.0")
+  .version("0.2.2")
   .option("-p, --push", "Push changes after committing")
   .option("-n, --noverify", "Skip git hooks (--no-verify)")
   .option("--use-ai", "Use AI generation (default: enabled)")
-  .option("--no-use-ai", "Disable AI generation, use rule-based suggestions only")
+  .option(
+    "--no-use-ai",
+    "Disable AI generation, use rule-based suggestions only"
+  )
   .option("-m, --multi-commit", "Enable multi-commit mode for atomic commits")
   .option("--no-multi-commit", "Disable multi-commit mode")
   .option("--no-history", "Disable commit history learning")
