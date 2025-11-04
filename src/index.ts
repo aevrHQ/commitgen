@@ -701,13 +701,18 @@ program
   .version("0.2.0")
   .option("-p, --push", "Push changes after committing")
   .option("-n, --noverify", "Skip git hooks (--no-verify)")
-  .option("--use-ai", "Enable AI generation (default: true)", true)
+  .option("--use-ai", "Use AI generation (default: enabled)")
+  .option("--no-use-ai", "Disable AI generation, use rule-based suggestions only")
   .option("-m, --multi-commit", "Enable multi-commit mode for atomic commits")
   .option("--no-multi-commit", "Disable multi-commit mode")
   .option("--no-history", "Disable commit history learning")
   .option("--no-issues", "Disable issue tracker integration")
   .action(async (options) => {
     const commitGen = new CommitGen();
+    // Default useAi to true if not explicitly set
+    if (options.useAi === undefined) {
+      options.useAi = true;
+    }
     await commitGen.run(options);
   });
 
