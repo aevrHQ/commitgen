@@ -1,3 +1,5 @@
+<!-- ./README.md -->
+
 # @untools/commitgen
 
 🚀 AI-powered commit message generator for Git with modular AI provider support.

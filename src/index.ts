@@ -138,6 +138,43 @@ class CommitGen {
     }
   }
 
+  private combineCommitMessages(messages: CommitMessage[]): CommitMessage {
+    // Find the most common type
+    const types = messages.map((m) => m.type);
+    const typeCount = types.reduce((acc, t) => {
+      acc[t] = (acc[t] || 0) + 1;
+      return acc;
+    }, {} as Record<string, number>);
+    const mostCommonType = Object.entries(typeCount).sort(
+      (a, b) => b[1] - a[1]
+    )[0][0];
+
+    // Combine scopes
+    const scopes = messages.map((m) => m.scope).filter(Boolean);
+    const uniqueScopes = [...new Set(scopes)];
+    const scope =
+      uniqueScopes.length > 0 ? uniqueScopes.slice(0, 2).join(", ") : undefined;
+
+    // Combine subjects
+    const subjects = messages.map((m) => m.subject);
+    const combinedSubject = subjects.join("; ");
+
+    // Combine bodies
+    const bodies = messages.map((m) => m.body).filter(Boolean);
+    const combinedBody = bodies.length > 0 ? bodies.join("\n\n") : undefined;
+
+    // Check if any message has breaking changes
+    const hasBreaking = messages.some((m) => m.breaking);
+
+    return {
+      type: mostCommonType,
+      scope,
+      subject: combinedSubject,
+      body: combinedBody,
+      breaking: hasBreaking,
+    };
+  }
+
   async run(options: {
     push?: boolean;
     noverify?: boolean;
@@ -168,15 +205,14 @@ class CommitGen {
 
     this.displayAnalysis(analysis);
 
-    let suggestions: CommitMessage[];
+    let suggestions: CommitMessage[] = [];
+    let usingFallback = false;
 
     if (options.useAi !== false) {
       try {
-        // Load provider configuration
         const configManager = new ConfigManager();
         let providerConfig = configManager.getProviderConfig();
 
-        // Check if API key is missing and prompt for configuration
         if (
           !providerConfig.apiKey &&
           !this.hasEnvironmentApiKey(providerConfig.provider)
@@ -202,33 +238,29 @@ class CommitGen {
               chalk.gray("Falling back to rule-based suggestions...\n")
             );
             suggestions = this.getFallbackSuggestions(analysis);
-            return;
+            usingFallback = true;
           }
         }
 
-        console.log(
-          chalk.blue(
-            `\n🤖 Generating commit messages using ${providerConfig.provider}...\n`
-          )
-        );
+        if (!usingFallback) {
+          console.log(
+            chalk.blue(
+              `\n🤖 Generating commit messages using ${providerConfig.provider}...\n`
+            )
+          );
 
-        // Create provider and generate suggestions
-        const provider = createProvider(providerConfig);
-        suggestions = await provider.generateCommitMessage(analysis);
+          const provider = createProvider(providerConfig);
+          suggestions = await provider.generateCommitMessage(analysis);
 
-        if (!suggestions || suggestions.length === 0) {
-          throw new Error("No suggestions generated");
+          if (!suggestions || suggestions.length === 0) {
+            throw new Error("No suggestions generated");
+          }
         }
       } catch (error) {
-        console.warn(
-          chalk.yellow(
-            `⚠️  AI generation failed: ${
-              error instanceof Error ? error.message : "Unknown error"
-            }`
-          )
-        );
+        const errorMessage =
+          error instanceof Error ? error.message : "Unknown error";
+        console.warn(chalk.yellow(`⚠️  AI generation failed: ${errorMessage}`));
 
-        // If it's an API key error, offer to reconfigure
         if (error instanceof Error && error.message.includes("API key")) {
           const { shouldReconfigure } = await inquirer.prompt([
             {
@@ -252,9 +284,11 @@ class CommitGen {
 
         console.log(chalk.gray("Falling back to rule-based suggestions...\n"));
         suggestions = this.getFallbackSuggestions(analysis);
+        usingFallback = true;
       }
     } else {
       suggestions = this.getFallbackSuggestions(analysis);
+      usingFallback = true;
     }
 
     console.log(chalk.cyan.bold("💡 Suggested commit messages:\n"));
@@ -264,21 +298,27 @@ class CommitGen {
       const preview = formatted.split("\n")[0];
       return {
         name: `${chalk.gray(`${i + 1}.`)} ${preview}`,
-        value: formatted,
+        value: i,
         short: preview,
       };
     });
 
     choices.push({
+      name: chalk.magenta("🔗 Combine all suggestions"),
+      value: -1,
+      short: "Combined",
+    });
+
+    choices.push({
       name: chalk.gray("✏️  Write custom message"),
-      value: "__custom__",
+      value: -2,
       short: "Custom message",
     });
 
-    const { selected } = await inquirer.prompt([
+    const { selectedIndex } = await inquirer.prompt([
       {
         type: "list",
-        name: "selected",
+        name: "selectedIndex",
         message: "Choose a commit message:",
         choices,
         pageSize: 10,
@@ -287,7 +327,49 @@ class CommitGen {
 
     let commitMessage: string;
 
-    if (selected === "__custom__") {
+    // Handle combined option
+    if (selectedIndex === -1) {
+      const combined = this.combineCommitMessages(suggestions);
+      const combinedFormatted = this.formatCommitMessage(combined);
+
+      console.log(chalk.cyan("\n📦 Combined message:"));
+      console.log(chalk.white(combinedFormatted));
+
+      const { action } = await inquirer.prompt([
+        {
+          type: "list",
+          name: "action",
+          message: "What would you like to do?",
+          choices: [
+            { name: "✅ Use this combined message", value: "use" },
+            { name: "✏️  Edit this message", value: "edit" },
+            { name: "🔙 Go back to suggestions", value: "back" },
+          ],
+        },
+      ]);
+
+      if (action === "back") {
+        return this.run(options);
+      } else if (action === "edit") {
+        const { edited } = await inquirer.prompt([
+          {
+            type: "input",
+            name: "edited",
+            message: "Edit commit message:",
+            default: combinedFormatted,
+            validate: (input: string) => {
+              if (!input.trim()) return "Commit message cannot be empty";
+              return true;
+            },
+          },
+        ]);
+        commitMessage = edited;
+      } else {
+        commitMessage = combinedFormatted;
+      }
+    }
+    // Handle custom message option
+    else if (selectedIndex === -2) {
       const { customMessage } = await inquirer.prompt([
         {
           type: "input",
@@ -300,29 +382,40 @@ class CommitGen {
         },
       ]);
       commitMessage = customMessage;
-    } else {
-      const { confirmed } = await inquirer.prompt([
+    }
+    // Handle regular selection
+    else {
+      const selected = this.formatCommitMessage(suggestions[selectedIndex]);
+
+      const { action } = await inquirer.prompt([
         {
-          type: "confirm",
-          name: "confirmed",
-          message: "Confirm this commit message?",
-          default: true,
+          type: "list",
+          name: "action",
+          message: "What would you like to do?",
+          choices: [
+            { name: "✅ Use this message", value: "use" },
+            { name: "✏️  Edit this message", value: "edit" },
+            { name: "🔙 Choose a different message", value: "back" },
+          ],
         },
       ]);
 
-      if (!confirmed) {
-        const { customMessage } = await inquirer.prompt([
+      if (action === "back") {
+        return this.run(options);
+      } else if (action === "edit") {
+        const { edited } = await inquirer.prompt([
           {
             type: "input",
-            name: "customMessage",
-            message: "Enter your commit message:",
+            name: "edited",
+            message: "Edit commit message:",
+            default: selected,
             validate: (input: string) => {
               if (!input.trim()) return "Commit message cannot be empty";
               return true;
             },
           },
         ]);
-        commitMessage = customMessage;
+        commitMessage = edited;
       } else {
         commitMessage = selected;
       }
@@ -434,7 +527,7 @@ const program = new Command();
 program
   .name("commitgen")
   .description("AI-powered commit message generator for Git")
-  .version("0.0.4")
+  .version("0.0.5")
   .option("-p, --push", "Push changes after committing")
   .option("-n, --noverify", "Skip git hooks (--no-verify)")
   .option("--no-ai", "Disable AI generation and use rule-based suggestions")
