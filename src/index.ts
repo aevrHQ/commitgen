@@ -257,7 +257,7 @@ class CommitGen {
     let suggestions: CommitMessage[] = [];
     let usingFallback = false;
 
-    if (options.useAi !== false) {
+    if (options.useAi) {
       try {
         const configManager = new ConfigManager();
         let providerConfig = configManager.getProviderConfig();
@@ -350,6 +350,9 @@ class CommitGen {
         usingFallback = true;
       }
     } else {
+      console.log(
+        chalk.gray("\n📝 Using rule-based suggestions (AI disabled)\n")
+      );
       suggestions = this.getFallbackSuggestions(analysis);
       usingFallback = true;
     }
@@ -405,7 +408,7 @@ class CommitGen {
       // Generate suggestions for this group
       let suggestions = [group.suggestedMessage];
 
-      if (options.useAi !== false) {
+      if (options.useAi) {
         try {
           const configManager = new ConfigManager();
           const providerConfig = configManager.getProviderConfig();
@@ -698,7 +701,7 @@ program
   .version("0.2.0")
   .option("-p, --push", "Push changes after committing")
   .option("-n, --noverify", "Skip git hooks (--no-verify)")
-  .option("--no-ai", "Disable AI generation and use rule-based suggestions")
+  .option("--use-ai", "Enable AI generation (default: true)", true)
   .option("-m, --multi-commit", "Enable multi-commit mode for atomic commits")
   .option("--no-multi-commit", "Disable multi-commit mode")
   .option("--no-history", "Disable commit history learning")
