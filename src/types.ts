@@ -34,3 +34,22 @@ export interface ProviderConfig {
   model?: string;
   baseUrl?: string;
 }
+
+// New interfaces for enhanced features
+export interface CommitGenOptions {
+  push?: boolean;
+  noverify?: boolean;
+  useAi?: boolean;
+  multiCommit?: boolean;
+  learnFromHistory?: boolean;
+  linkIssues?: boolean;
+}
+
+export interface EnhancedConfig {
+  provider: ProviderConfig;
+  features: {
+    historyLearning: boolean;
+    multiCommit: boolean;
+    issueTracking: boolean;
+  };
+}
