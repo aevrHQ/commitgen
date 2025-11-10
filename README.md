@@ -170,6 +170,50 @@ Uses the [Vercel AI SDK](https://sdk.vercel.ai/) with Google's Gemini models.
 - `gemini-1.5-flash`
 - `gemini-1.5-pro`
 
+### Model Selection
+
+You can override the default model for a single commit using the `--model` flag:
+
+```bash
+# Use a specific Gemini model
+commitgen --model gemini-1.5-flash
+commitgen --model gemini-2.5-pro
+commitgen --model gemini-1.5-pro
+
+# This overrides your configured model temporarily
+# Your config file remains unchanged
+```
+
+**Available Models (Google Gemini):**
+
+- `gemini-2.5-flash` - Fast and efficient (default)
+- `gemini-2.5-pro` - More capable, higher quality
+- `gemini-1.5-flash` - Previous generation, fast
+- `gemini-1.5-pro` - Previous generation, high quality
+
+**When to Use Different Models:**
+
+- **Large changesets (100+ files)**: Use `gemini-2.5-pro` for better context understanding
+- **Quick commits**: Use `gemini-2.5-flash` for speed
+- **API rate limiting**: Switch to `gemini-1.5-flash` as a fallback
+- **API overload**: Try different model when one is overloaded
+
+**Examples:**
+
+```bash
+# Override model for a complex refactoring
+commitgen --model gemini-2.5-pro
+
+# Quick commit with faster model
+commitgen --model gemini-1.5-flash
+
+# Combine with other flags
+commitgen --model gemini-2.5-pro --push
+commitgen --model gemini-1.5-flash --no-history
+```
+
+**Note:** The model override only applies to the current command. To permanently change your model, use `commitgen config`.
+
 ### Coming Soon
 
 - **Vercel AI SDK - OpenAI**: GPT-4o, GPT-4o-mini

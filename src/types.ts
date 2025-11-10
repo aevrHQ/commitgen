@@ -8,15 +8,6 @@ export interface CommitMessage {
   breaking?: boolean;
 }
 
-export interface GitAnalysis {
-  filesChanged: string[];
-  additions: number;
-  deletions: number;
-  hasStaged: boolean;
-  hasUnstaged: boolean;
-  diff: string;
-}
-
 export interface AIProvider {
   name: string;
   generateCommitMessage(analysis: GitAnalysis): Promise<CommitMessage[]>;
@@ -43,6 +34,7 @@ export interface CommitGenOptions {
   multiCommit?: boolean;
   learnFromHistory?: boolean;
   linkIssues?: boolean;
+  model?: string; // NEW: Model override option
 }
 
 export interface EnhancedConfig {
@@ -52,4 +44,18 @@ export interface EnhancedConfig {
     multiCommit: boolean;
     issueTracking: boolean;
   };
+}
+
+export interface GitAnalysis {
+  filesChanged: string[];
+  additions: number;
+  deletions: number;
+  hasStaged: boolean;
+  hasUnstaged: boolean;
+  diff: string;
+}
+
+export interface AIProvider {
+  name: string;
+  generateCommitMessage(analysis: GitAnalysis): Promise<CommitMessage[]>;
 }
