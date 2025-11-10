@@ -35,6 +35,7 @@ export class VercelGoogleProvider extends BaseProvider implements AIProvider {
         system: this.buildSystemPrompt(),
         prompt: this.buildAnalysisPrompt(analysis),
         temperature: 0.7,
+        maxRetries: 2, // Reduce retries to fail faster
       });
 
       // Parse JSON response
@@ -46,9 +47,41 @@ export class VercelGoogleProvider extends BaseProvider implements AIProvider {
       const suggestions: CommitMessage[] = JSON.parse(jsonMatch[0]);
       return suggestions.slice(0, 5);
     } catch (error) {
+      // Check for specific error types
+      if (error instanceof Error) {
+        const errorMsg = error.message.toLowerCase();
+
+        // Handle rate limiting / overload
+        if (errorMsg.includes("overloaded") || errorMsg.includes("503")) {
+          throw new Error(
+            "The Google Gemini API is currently overloaded. Please try again in a few moments, or use '--no-use-ai' for rule-based suggestions."
+          );
+        }
+
+        // Handle authentication errors
+        if (
+          errorMsg.includes("api key") ||
+          errorMsg.includes("401") ||
+          errorMsg.includes("403")
+        ) {
+          throw new Error(
+            "API key error. Please run 'commitgen config' to update your configuration."
+          );
+        }
+
+        // Handle network errors
+        if (errorMsg.includes("network") || errorMsg.includes("econnrefused")) {
+          throw new Error(
+            "Network error. Please check your internet connection."
+          );
+        }
+      }
+
+      // Log the actual error for debugging
       console.error("Error generating commit message:", error);
-      // Fallback to rule-based suggestions
-      return this.getFallbackSuggestions(analysis);
+
+      // Re-throw to let the main handler deal with fallback
+      throw error;
     }
   }
 

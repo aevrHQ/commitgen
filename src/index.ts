@@ -308,26 +308,81 @@ class CommitGen {
             )
           );
 
-          const provider = createProvider(providerConfig);
-          suggestions = await provider.generateCommitMessage(analysis);
+          try {
+            const provider = createProvider(providerConfig);
+            suggestions = await provider.generateCommitMessage(analysis);
 
-          if (!suggestions || suggestions.length === 0) {
-            throw new Error("No suggestions generated");
-          }
+            if (!suggestions || suggestions.length === 0) {
+              throw new Error("No suggestions generated");
+            }
 
-          // Personalize suggestions based on history
-          if (historyPattern) {
-            suggestions = suggestions.map((msg) =>
-              this.historyAnalyzer.personalizeCommitMessage(msg, historyPattern)
+            // Personalize suggestions based on history
+            if (historyPattern) {
+              suggestions = suggestions.map((msg) =>
+                this.historyAnalyzer.personalizeCommitMessage(
+                  msg,
+                  historyPattern
+                )
+              );
+            }
+
+            // Adjust type based on issue if available
+            if (issueRef) {
+              suggestions = suggestions.map((msg) => ({
+                ...msg,
+                type: this.issueTracker.suggestTypeFromIssue(
+                  issueRef,
+                  msg.type
+                ),
+              }));
+            }
+          } catch (error) {
+            const errorMessage =
+              error instanceof Error ? error.message : "Unknown error";
+
+            // Check if it's an API overload error
+            if (
+              errorMessage.includes("overloaded") ||
+              errorMessage.includes("503")
+            ) {
+              console.warn(chalk.yellow(`\n⚠️  ${errorMessage}`));
+              console.log(
+                chalk.blue(
+                  "💡 Tip: You can use 'commitgen --no-use-ai' to skip AI generation"
+                )
+              );
+            } else if (errorMessage.includes("API key")) {
+              console.warn(chalk.yellow(`\n⚠️  ${errorMessage}`));
+
+              const { shouldReconfigure } = await inquirer.prompt([
+                {
+                  type: "confirm",
+                  name: "shouldReconfigure",
+                  message: "Would you like to reconfigure your API key?",
+                  default: true,
+                },
+              ]);
+
+              if (shouldReconfigure) {
+                await configureCommand();
+                console.log(
+                  chalk.blue(
+                    "\n🔄 Please run the command again with your new configuration."
+                  )
+                );
+                return;
+              }
+            } else {
+              console.warn(
+                chalk.yellow(`\n⚠️  AI generation failed: ${errorMessage}`)
+              );
+            }
+
+            console.log(
+              chalk.gray("\nFalling back to rule-based suggestions...\n")
             );
-          }
-
-          // Adjust type based on issue if available
-          if (issueRef) {
-            suggestions = suggestions.map((msg) => ({
-              ...msg,
-              type: this.issueTracker.suggestTypeFromIssue(issueRef, msg.type),
-            }));
+            suggestions = this.getFallbackSuggestions(analysis);
+            usingFallback = true;
           }
         }
       } catch (error) {
