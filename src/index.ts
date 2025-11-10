@@ -14,6 +14,7 @@ import { MultiCommitAnalyzer } from "./utils/multi-commit";
 import { IssueTrackerIntegration } from "./utils/issue-tracker";
 import { Answers } from "inquirer";
 import { LoadingIndicator, withLoading } from "./utils/loading";
+import { readFileSync } from "fs";
 
 // Graceful shutdown handler
 process.on("SIGINT", () => {
@@ -783,10 +784,16 @@ class CommitGen {
 // CLI setup
 const program = new Command();
 
+// function to get version from package.json
+const getVersion = () => {
+  const packageJson = JSON.parse(readFileSync("package.json", "utf8"));
+  return packageJson.version;
+};
+
 program
   .name("commitgen")
   .description("AI-powered commit message generator for Git")
-  .version("0.2.2")
+  .version(getVersion())
   .option("-p, --push", "Push changes after committing")
   .option("-n, --noverify", "Skip git hooks (--no-verify)")
   .option("--use-ai", "Use AI generation (default: enabled)")
