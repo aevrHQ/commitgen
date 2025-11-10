@@ -25,7 +25,17 @@
 │   │   └── vercel-google.js.map
 │   ├── types.d.ts
 │   ├── types.js
-│   └── types.js.map
+│   ├── types.js.map
+│   └── utils
+│       ├── commit-history.d.ts
+│       ├── commit-history.js
+│       ├── commit-history.js.map
+│       ├── issue-tracker.d.ts
+│       ├── issue-tracker.js
+│       ├── issue-tracker.js.map
+│       ├── multi-commit.d.ts
+│       ├── multi-commit.js
+│       └── multi-commit.js.map
 ├── package-lock.json
 ├── package.json
 ├── README.md
@@ -42,8 +52,10 @@
 │   └── utils
 │       ├── commit-history.ts
 │       ├── issue-tracker.ts
+│       ├── loading.ts
 │       └── multi-commit.ts
 ├── tree.md
-└── tsconfig.json
+├── tsconfig.json
+└── WARP.md
 
-9 directories, 38 files
+10 directories, 49 files

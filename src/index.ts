@@ -13,6 +13,7 @@ import { CommitHistoryAnalyzer } from "./utils/commit-history";
 import { MultiCommitAnalyzer } from "./utils/multi-commit";
 import { IssueTrackerIntegration } from "./utils/issue-tracker";
 import { Answers } from "inquirer";
+import { LoadingIndicator, withLoading } from "./utils/loading";
 
 // Graceful shutdown handler
 process.on("SIGINT", () => {
@@ -332,14 +333,13 @@ class CommitGen {
 
         if (!usingFallback) {
           const modelDisplay = providerConfig.model || "default";
-          console.log(
-            chalk.blue(
-              `\n🤖 Generating commit messages using ${providerConfig.provider} (${modelDisplay})...\n`
-            )
-          );
 
           const provider = createProvider(providerConfig);
-          suggestions = await provider.generateCommitMessage(analysis);
+          suggestions = await withLoading(
+            `Generating commit messages using ${providerConfig.provider} (${modelDisplay})...`,
+            async () => await provider.generateCommitMessage(analysis),
+            "Commit messages generated"
+          );
 
           if (!suggestions || suggestions.length === 0) {
             throw new Error("No suggestions generated");
@@ -470,7 +470,6 @@ class CommitGen {
 
       // Generate suggestions for this group
       let suggestions = [group.suggestedMessage];
-
       if (options.useAi) {
         try {
           const configManager = new ConfigManager();
@@ -486,7 +485,18 @@ class CommitGen {
             this.hasEnvironmentApiKey(providerConfig.provider)
           ) {
             const provider = createProvider(providerConfig);
-            suggestions = await provider.generateCommitMessage(group.analysis);
+            const loader = new LoadingIndicator("Generating commit message...");
+            loader.start();
+
+            try {
+              suggestions = await provider.generateCommitMessage(
+                group.analysis
+              );
+              loader.succeed("Generated");
+            } catch (err) {
+              loader.stop();
+              throw err;
+            }
           }
         } catch (error) {
           console.log(chalk.gray("Using suggested message for this commit"));
