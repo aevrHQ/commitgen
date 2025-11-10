@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.2.4](https://github.com/aevrHQ/commitgen/compare/v0.2.3...v0.2.4) (2025-11-10)
+
+
+### Code Refactoring
+
+* **cli:** load version from package.json ([ee4b1fe](https://github.com/aevrHQ/commitgen/commit/ee4b1feb9cc6d21631681d97b7ec41d5cee52cbd))
+
 ### [0.2.3](https://github.com/aevrHQ/commitgen/compare/v0.2.2...v0.2.3) (2025-11-10)
 
 
