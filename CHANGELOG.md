@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.2.3](https://github.com/aevrHQ/commitgen/compare/v0.2.2...v0.2.3) (2025-11-10)
+
+
+### Features
+
+* **cli:** add loading indicator for AI generation ([626ec95](https://github.com/aevrHQ/commitgen/commit/626ec95b40f9af43985b53d24076fadbe64ee8f3))
+* **model:** add --model flag for runtime selection ([52cbefa](https://github.com/aevrHQ/commitgen/commit/52cbefaafc484690facffd0d10455effba599ab2))
+* **process:** add graceful shutdown handler ([007cc6f](https://github.com/aevrHQ/commitgen/commit/007cc6f22fb0b3e2c1f8bb897cfaa7edb65e5b2b))
+
+
+### Bug Fixes
+
+* **ai:** handle AI provider overload errors ([ccc8532](https://github.com/aevrHQ/commitgen/commit/ccc85326742899a6be2f54878fd5397c696cbed8))
+
 ### [0.2.2](https://github.com/aevrHQ/commitgen/compare/v0.2.1...v0.2.2) (2025-11-04)
 
 
