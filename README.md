@@ -685,7 +685,7 @@ The tool will automatically fall back to rule-based suggestions if AI generation
 
 ```bash
 # Clone the repository
-git clone [https://github.com/aevrHQ/untools-commitgen.git](https://github.com/aevrHQ/untools-commitgen.git)
+git clone [https://github.com/aevrHQ/commitgen.git](https://github.com/aevrHQ/commitgen.git)
 cd untools-commitgen
 
 # Install dependencies
@@ -723,9 +723,9 @@ MIT © Miracle Onyenma
 
 ## Links
 
-- [GitHub Repository](https://github.com/aevrHQ/untools-commitgen)
+- [GitHub Repository](https://github.com/aevrHQ/commitgen)
 - [npm Package](https://www.npmjs.com/package/@untools/commitgen)
-- [Issue Tracker](https://github.com/aevrHQ/untools-commitgen/issues)
+- [Issue Tracker](https://github.com/aevrHQ/commitgen/issues)
 
 -----
 

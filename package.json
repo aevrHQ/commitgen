@@ -40,12 +40,12 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/aevrHQ/untools-commitgen.git"
+    "url": "https://github.com/aevrHQ/commitgen.git"
   },
   "bugs": {
-    "url": "https://github.com/aevrHQ/untools-commitgen/issues"
+    "url": "https://github.com/aevrHQ/commitgen/issues"
   },
-  "homepage": "https://github.com/aevrHQ/untools-commitgen#readme",
+  "homepage": "https://github.com/aevrHQ/commitgen#readme",
   "dependencies": {
     "@ai-sdk/google": "^2.0.26",
     "@untools/port-gen": "^0.0.2",
