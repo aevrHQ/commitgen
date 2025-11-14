@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [0.3.0](https://github.com/aevrHQ/commitgen/compare/v0.2.6...v0.3.0) (2025-11-14)
+
+
+### Chores
+
+* **repo:** update github repository urls ([a3d8f9f](https://github.com/aevrHQ/commitgen/commit/a3d8f9f55186b42bfb8ba31ca2cbf8887ba70692))
+
 ### [0.2.6](https://github.com/aevrHQ/commitgen/compare/v0.2.5...v0.2.6) (2025-11-10)
 
 
