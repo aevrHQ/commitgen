@@ -97,6 +97,19 @@ export default function Home() {
                   strictly to Conventional Commits standards.
                 </p>
               </Card>
+
+              <Card
+                title="Smart Refinement"
+                subtitle="Regeneration & Hints"
+                icon={<Flash size="24" variant="Bulk" color="currentColor" />}
+                variant="default"
+              >
+                <p className="text-neutral-600 dark:text-neutral-400">
+                  Not happy with the result? Ask the AI to regenerate with
+                  custom hints like &quot;Make it shorter&quot; or &quot;Add
+                  emojis&quot;.
+                </p>
+              </Card>
             </CardGrid>
           </div>
         </section>

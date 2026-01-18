@@ -2,7 +2,7 @@
 
 **The AI-Powered Commit Generator**
 
-CommitGen is a powerful CLI tool that leverages AI to generate conventional commit messages from your staged changes. It works with 50 free credits (no key required) or your own Google AI API key.
+CommitGen is a powerful CLI tool that leverages AI to generate conventional commit messages from your staged changes. It works with 50 free credits (no key required) or your own Google AI API key. It now displays detailed credit usage and cost per generation.
 
 ## Installation
 
@@ -72,6 +72,12 @@ commitgen --multi-commit
 ```
 
 _The CLI will prompt you to confirm the split groups before proceeding._
+
+### 🔄 Regeneration with Hints
+
+Don't like the suggestions? You can ask the AI to try again, optionally providing a **hint** to guide the generation (e.g., "Use emojis", "Focus on the UI changes", "Be more descriptive").
+
+Select **"🔄 Regenerate suggestions"** from the interactive menu.
 
 ### 🧠 History Learning
 

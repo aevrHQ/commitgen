@@ -10,6 +10,7 @@ CommitGen is a powerful developer tool that leverages AI to generate conventiona
 
 - **Automated Generation**: Generates semantic commit messages based on staged changes.
 - **Interactive Mode**: Review and edit generated messages before committing.
+- **Regeneration & Hints**: Ask AI to refine suggestions with custom instructions (e.g., "Make it more concise").
 - **Git Integration**: Seamlessly integrates with your existing git workflow.
 - **Login Integration**: Authenticate via the CLI to sync with your web profile.
 
