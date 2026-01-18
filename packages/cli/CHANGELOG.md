@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.4.5](https://github.com/aevrHQ/commitgen/compare/v0.4.4...v0.4.5) (2026-01-18)
+
+
+### Features
+
+* **api:** Add support for user-provided hint in commit generation. ([e2d5cc7](https://github.com/aevrHQ/commitgen/commit/e2d5cc796024e8da639c6b14c6636e355c715451))
+* **cli:** Update commitgen and vercel-google providers for api usage tracking. ([d7238fc](https://github.com/aevrHQ/commitgen/commit/d7238fc4119381fbecb2bda1d8a168ad75f33e6f))
+
+
+### Documentation
+
+* **auth:** Add regeneration & hints feature to CommitGen. ([a736eed](https://github.com/aevrHQ/commitgen/commit/a736eed4c9366aedd53032834af61e759aa17b26))
+
 ### [0.4.4](https://github.com/aevrHQ/commitgen/compare/v0.4.3...v0.4.4) (2026-01-17)
 
 
