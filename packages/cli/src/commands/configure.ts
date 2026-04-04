@@ -1,5 +1,7 @@
 // ./src/commands/configure.ts
 
+import os from "os";
+import path from "path";
 import inquirer from "inquirer";
 import chalk from "chalk";
 import { ConfigManager } from "../config";
@@ -128,20 +130,25 @@ export async function configureCommand(): Promise<void> {
 
     if (shouldLogin) {
       await loginCommand();
-      // loginCommand saves the config, so we should reload it or just return?
-      // configureCommand ends by saving configManager.setProvider(config).
-      // config variable currently is { provider: 'commitgen' }.
-      // loginCommand saves { provider: 'commitgen', apiKey: token }.
-
-      // If we proceed to save 'config' at the end of this function, we might overwrite the apiKey with undefined if we aren't careful.
-      // logic:
-      // loginCommand saves the token.
-      // We should probably pull the new config/token so we don't overwrite it.
-
-      const newConfig = configManager.getProviderConfig();
-      if (newConfig.provider === "commitgen" && newConfig.apiKey) {
-        config.apiKey = newConfig.apiKey;
+      // loginCommand handles its own errors, so verify that the token was
+      // actually persisted before reporting success and returning early.
+      const updatedConfig = new ConfigManager().getProviderConfig();
+      if (updatedConfig.provider === "commitgen" && updatedConfig.apiKey) {
+        // loginCommand already saves the full config (provider + token) to disk.
+        // Return early to avoid overwriting the saved token with an incomplete config.
+        console.log(chalk.green("\n✅ Configuration saved successfully!"));
+        console.log(
+          chalk.gray(`Config file: ${path.join(os.homedir(), ".commitgenrc.json")}`)
+        );
+        return;
       }
+
+      console.log(
+        chalk.red(
+          "\n❌ Login did not complete successfully. Continuing configuration without authentication."
+        )
+      );
+      console.log(chalk.gray("Run `commitgen login` later to authenticate."));
     } else {
       console.log(chalk.gray("Run `commitgen login` later to authenticate."));
     }
@@ -151,6 +158,6 @@ export async function configureCommand(): Promise<void> {
 
   console.log(chalk.green("\n✅ Configuration saved successfully!"));
   console.log(
-    chalk.gray(`Config file: ${require("os").homedir()}/.commitgenrc.json`)
+    chalk.gray(`Config file: ${path.join(os.homedir(), ".commitgenrc.json")}`)
   );
 }

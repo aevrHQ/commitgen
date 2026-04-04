@@ -344,7 +344,6 @@ class CommitGen {
 
             if (result.shouldConfigure) {
               await configureCommand();
-              providerConfig = configManager.getProviderConfig();
               activeLoop = true;
               continue;
             } else {
