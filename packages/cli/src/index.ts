@@ -86,7 +86,7 @@ class CommitGen {
         maxBuffer: 10 * 1024 * 1024, // 10MB
       }).trim();
     } catch (error: any) {
-      const stderr = error?.stderr?.trim();
+      const stderr = error?.stderr ? error.stderr.toString().trim() : "";
       const message = stderr || error?.message || String(error);
       throw new Error(message);
     }
