@@ -1,6 +1,7 @@
 // ./src/commands/configure.ts
 
 import os from "os";
+import path from "path";
 import inquirer from "inquirer";
 import chalk from "chalk";
 import { ConfigManager } from "../config";
@@ -129,13 +130,25 @@ export async function configureCommand(): Promise<void> {
 
     if (shouldLogin) {
       await loginCommand();
-      // loginCommand already saves the full config (provider + token) to disk.
-      // Return early to avoid overwriting the saved token with an incomplete config.
-      console.log(chalk.green("\n✅ Configuration saved successfully!"));
+      // loginCommand handles its own errors, so verify that the token was
+      // actually persisted before reporting success and returning early.
+      const updatedConfig = new ConfigManager().getProviderConfig();
+      if (updatedConfig.provider === "commitgen" && updatedConfig.apiKey) {
+        // loginCommand already saves the full config (provider + token) to disk.
+        // Return early to avoid overwriting the saved token with an incomplete config.
+        console.log(chalk.green("\n✅ Configuration saved successfully!"));
+        console.log(
+          chalk.gray(`Config file: ${path.join(os.homedir(), ".commitgenrc.json")}`)
+        );
+        return;
+      }
+
       console.log(
-        chalk.gray(`Config file: ${os.homedir()}/.commitgenrc.json`)
+        chalk.red(
+          "\n❌ Login did not complete successfully. Continuing configuration without authentication."
+        )
       );
-      return;
+      console.log(chalk.gray("Run `commitgen login` later to authenticate."));
     } else {
       console.log(chalk.gray("Run `commitgen login` later to authenticate."));
     }
@@ -145,6 +158,6 @@ export async function configureCommand(): Promise<void> {
 
   console.log(chalk.green("\n✅ Configuration saved successfully!"));
   console.log(
-    chalk.gray(`Config file: ${os.homedir()}/.commitgenrc.json`)
+    chalk.gray(`Config file: ${path.join(os.homedir(), ".commitgenrc.json")}`)
   );
 }
