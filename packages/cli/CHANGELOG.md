@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.4.6](https://github.com/aevrHQ/commitgen/compare/v0.4.5...v0.4.6) (2026-04-04)
+
+
+### Bug Fixes
+
+* address review feedback - verify login success, use path.join, remove dead assignment ([ad487af](https://github.com/aevrHQ/commitgen/commit/ad487afdd0e32a36451d9144c6b4cba69cdb212a))
+* resolve CLI authentication loop bug and cleanup require() anti-pattern ([92369c0](https://github.com/aevrHQ/commitgen/commit/92369c0be54238f416a2a8d74af3e63d063e2d83))
+
+
+### Chores
+
+* update package-lock.json dependencies ([174aee2](https://github.com/aevrHQ/commitgen/commit/174aee282de463a96f54c9a0b1f8521f359ad485))
+
 ### [0.4.5](https://github.com/aevrHQ/commitgen/compare/v0.4.4...v0.4.5) (2026-01-18)
 
 
