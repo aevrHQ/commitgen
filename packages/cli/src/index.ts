@@ -78,6 +78,20 @@ class CommitGen {
     }
   }
 
+  private execStrict(cmd: string): string {
+    try {
+      return execSync(cmd, {
+        encoding: "utf8",
+        stdio: ["pipe", "pipe", "pipe"],
+        maxBuffer: 10 * 1024 * 1024, // 10MB
+      }).trim();
+    } catch (error: any) {
+      const stderr = error?.stderr ? error.stderr.toString().trim() : "";
+      const message = stderr || error?.message || String(error);
+      throw new Error(message);
+    }
+  }
+
   private isGitRepo(): boolean {
     return this.exec("git rev-parse --git-dir") !== "";
   }
@@ -809,13 +823,13 @@ class CommitGen {
         commitCmd += " --no-verify";
       }
 
-      this.exec(commitCmd);
+      this.execStrict(commitCmd);
       console.log(chalk.green("\n✅ Commit successful!"));
 
       if (options.push && !specificFiles) {
         console.log(chalk.blue("\n📤 Pushing to remote..."));
         const currentBranch = this.exec("git branch --show-current");
-        this.exec(`git push origin ${currentBranch}`);
+        this.execStrict(`git push origin ${currentBranch}`);
         console.log(chalk.green("✅ Pushed successfully!"));
       }
     } catch (error) {
