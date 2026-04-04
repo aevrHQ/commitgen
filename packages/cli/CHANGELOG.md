@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.4.7](https://github.com/aevrHQ/commitgen/compare/v0.4.6...v0.4.7) (2026-04-04)
+
+
+### Bug Fixes
+
+* convert stderr Buffer to string in execStrict ([81fc9d5](https://github.com/aevrHQ/commitgen/commit/81fc9d552854a66bd8c5d4102269ae2a3fcf3a9b))
+* use execStrict for git commit/push to surface real errors ([7a58829](https://github.com/aevrHQ/commitgen/commit/7a588297740768ca878f26abc5090fba0e2eb951))
+
 ### [0.4.6](https://github.com/aevrHQ/commitgen/compare/v0.4.5...v0.4.6) (2026-04-04)
 
 
