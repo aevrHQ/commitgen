@@ -4,7 +4,7 @@ import { exec } from "child_process";
 import { platform } from "os";
 
 const WEB_APP_URL =
-  process.env.COMMITGEN_WEB_URL || "https://commitgen.aevr.space";
+  process.env.COMMITGEN_WEB_URL || "https://commitgen.aevr.online";
 
 /**
  * Opens a URL in the default browser
@@ -45,10 +45,12 @@ export async function dashboardCommand(): Promise<void> {
 
   if (!token) {
     console.log(
-      chalk.yellow("⚠️  You are not logged in. Opening dashboard without auth.")
+      chalk.yellow(
+        "⚠️  You are not logged in. Opening dashboard without auth.",
+      ),
     );
     console.log(
-      chalk.blue("💡 Run 'commitgen login' to log in and sync your account.\n")
+      chalk.blue("💡 Run 'commitgen login' to log in and sync your account.\n"),
     );
   }
 
@@ -65,7 +67,7 @@ export async function dashboardCommand(): Promise<void> {
 
     if (token) {
       console.log(
-        chalk.blue("ℹ  You're signed in automatically via CLI token.")
+        chalk.blue("ℹ  You're signed in automatically via CLI token."),
       );
     }
   } catch (error) {

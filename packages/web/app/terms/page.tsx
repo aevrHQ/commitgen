@@ -44,7 +44,7 @@ We may update these Terms from time to time. Continued use of the service consti
 
 ## 8. Contact
 
-For questions about these Terms, please contact us at **support@aevr.space**.
+For questions about these Terms, please contact us at **support@aevr.online**.
 `;
 
 const TermsPage = async () => {

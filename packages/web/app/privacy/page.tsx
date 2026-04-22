@@ -7,7 +7,7 @@ const formattedContent = `
 
 **Effective Date:** December 10, 2025
 
-CommitGen ("we", "us", or "our"), a product of Aevr Space Studio, is committed to protecting your privacy. This Privacy Policy outlines how we collect, use, and safeguard your data when you use the CommitGen CLI tool, website (commitgen.aevr.space), and related services.
+CommitGen ("we", "us", or "our"), a product of Aevr Space Studio, is committed to protecting your privacy. This Privacy Policy outlines how we collect, use, and safeguard your data when you use the CommitGen CLI tool, website (commitgen.aevr.online), and related services.
 
 ## 1. Information We Collect
 
@@ -52,7 +52,7 @@ You have the right to:
 
 ## 6. Contact Us
 
-For privacy concerns, please contact us at **privacy@aevr.space**.
+For privacy concerns, please contact us at **privacy@aevr.online**.
 `;
 
 const PrivacyPage = async () => {

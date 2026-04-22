@@ -19,6 +19,6 @@
     "hooks": "@/hooks"
   },
   "registries": {
-    "@aevr": "https://ui.aevr.space/r/{name}.json"
+    "@aevr": "https://ui.aevr.online/r/{name}.json"
   }
 }

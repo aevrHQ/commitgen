@@ -11,7 +11,7 @@ export async function buyCreditsCommand() {
   console.log(chalk.cyan("\n💎 Buy CommitGen Credits\n"));
 
   const WEB_APP_URL =
-    process.env.COMMITGEN_WEB_URL || "https://commitgen.aevr.space";
+    process.env.COMMITGEN_WEB_URL || "https://commitgen.aevr.online";
 
   try {
     const packagesResponse = await fetch(`${WEB_APP_URL}/api/credits/packages`);
