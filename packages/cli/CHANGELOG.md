@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.4.8](https://github.com/aevrHQ/commitgen/compare/v0.4.7...v0.4.8) (2026-04-22)
+
+
+### Chores
+
+* update project domain from .space to .online across CLI and web configurations ([6d7fcd0](https://github.com/aevrHQ/commitgen/commit/6d7fcd0ef318b86def76b244452642a4179c766e))
+
 ### [0.4.7](https://github.com/aevrHQ/commitgen/compare/v0.4.6...v0.4.7) (2026-04-04)
 
 
