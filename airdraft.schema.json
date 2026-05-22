@@ -17,6 +17,10 @@
         },
         "body": {
           "type": "rich-text"
+        },
+        "Author": {
+          "type": "relations",
+          "collection": "authors"
         }
       }
     },
