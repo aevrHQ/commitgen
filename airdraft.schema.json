@@ -23,7 +23,12 @@
     "authors": {
       "path": "authors/{slug}.json",
       "format": "json",
-      "fields": {},
+      "fields": {
+        "Name": {
+          "type": "string",
+          "required": true
+        }
+      },
       "publish": true
     }
   }
