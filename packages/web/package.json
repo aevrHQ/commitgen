@@ -10,6 +10,8 @@
   },
   "dependencies": {
     "@100pay-hq/checkout": "^1.4.9",
+    "@airdraft/core": "^0.1.0",
+    "@airdraft/next": "^0.1.0",
     "@radix-ui/react-collapsible": "^1.1.12",
     "@radix-ui/react-dialog": "^1.1.15",
     "@radix-ui/react-scroll-area": "^1.2.10",

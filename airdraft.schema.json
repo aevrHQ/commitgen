@@ -1,0 +1,24 @@
+{
+  "$schema": "https://airdraft.dev/schema/v1",
+  "version": 1,
+  "collections": {
+    "posts": {
+      "path": "content/posts/{slug}.mdx",
+      "format": "mdx",
+      "publish": true,
+      "slugSource": "title",
+      "fields": {
+        "title": {
+          "type": "string",
+          "required": true
+        },
+        "excerpt": {
+          "type": "string"
+        },
+        "body": {
+          "type": "rich-text"
+        }
+      }
+    }
+  }
+}
