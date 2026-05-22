@@ -21,6 +21,9 @@
         "Author": {
           "type": "relations",
           "collection": "authors"
+        },
+        "cover": {
+          "type": "image"
         }
       }
     },
