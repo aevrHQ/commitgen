@@ -19,6 +19,12 @@
           "type": "rich-text"
         }
       }
+    },
+    "authors": {
+      "path": "authors/{slug}.json",
+      "format": "json",
+      "fields": {},
+      "publish": true
     }
   }
 }
